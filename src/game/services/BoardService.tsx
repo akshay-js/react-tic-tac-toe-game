@@ -90,25 +90,25 @@ class BoardService{
           }
         }
         return false;
-      }
-    
-      private checkColumnWin(): boolean {
+    }
+
+    private checkColumnWin(): boolean {
         for (let col = 0; col < 3; col++) {
-          if (
+            if (
             this.board[0][col] !== '-' &&
             this.board[0][col] === this.board[1][col] &&
             this.board[1][col] === this.board[2][col]
-          ) {
+            ) {
             this.setWinner(this.board[0][col]);
             return true;
-          }
+            }
         }
         return false;
-      }
-    
-      private checkDraw(): boolean {
+    }
+
+    private checkDraw(): boolean {
         return this.board.every(row => row.every(cell => cell !== '-'));
-      }
+    }
 }
 const obj = BoardService.getInstance();
 export default obj;
