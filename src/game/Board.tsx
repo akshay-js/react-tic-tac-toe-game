@@ -1,25 +1,32 @@
 import { useState } from "react";
 import Square from "./Square";
-import { PlayerClass } from "./services/BoardService";
 import BoardService from "./services/BoardService";
 
 export default function Board() {
-  const [player, setPlayer] = useState(PlayerClass.getOpponent());
 
-  const move = (row: number, col: number) => {
+  const [board, setBoard] = useState<string[][]>(BoardService.board);
+  const [winner, setWinner] = useState<string>(BoardService.getWinner());
+  
+  const move = (row: number, col: number): void => {
     BoardService.move(row, col);
-    setPlayer(PlayerClass.getOpponent());
+    setBoard([...BoardService.board]);
+    setWinner(BoardService.getWinner());
   };
 
-  const boardObj = BoardService.board;
+  const reset = (): void => {
+    BoardService.reset();
+    setBoard([...BoardService.board]);
+    setWinner(BoardService.getWinner());
+  };
+  
   return (
     <>
       {
-        BoardService.isOver() &&
-        <h1>Winner is {PlayerClass.getWinner()}</h1>
+        winner !== 'none' &&
+        <h1>Winner is {winner}</h1>
       }
       {
-        boardObj.map((row, rowIndex) => (
+        board.map((row, rowIndex) => (
           <div className="board-row" key={rowIndex}>
             {
               row.map((col, colIndex) => (
@@ -29,6 +36,7 @@ export default function Board() {
           </div>
         ))
       }
+      <button type="button" onClick={ () => reset() }>Reset</button>
     </>
   );
 }

@@ -1,24 +1,18 @@
 export class PlayerClass{
     private static opponent:string = "O";
-    private static winner: string = ""
     constructor(){
     }
-    public static setOppnent(op: string){
+    public static setOpponent(op: string){
         this.opponent = op;
     }
     public static getOpponent(){
         return this.opponent;
     }
-    public static setWinner(op: string){
-        this.winner = op;
-    }
-    public static getWinner(){
-        return this.winner;
-    }
 }
 
 class BoardService{
     public board:string[][] = [];
+    private winner: string = '';
 
     private static _instance: BoardService = new BoardService();
 
@@ -26,43 +20,95 @@ class BoardService{
         if(BoardService._instance){
             throw new Error("Error in the object creation");
         }
-        PlayerClass.setOppnent('X');
         this.createBoard();
-        BoardService._instance = this;
     }
 
     public static getInstance(): BoardService{
         return BoardService._instance;
     }
-    createBoard(): string[][]{
-        for (let i = 0; i < 3; i++) {
-            this.board[i] = [];
-            for(let k=0; k< 3; k++){
-                this.board[i][k] = "-";
-            }
-        }
+
+    private createBoard(): string[][]{
+        PlayerClass.setOpponent('X');
+        this.winner = '';
+        this.board = Array.from({ length: 3 }, () => Array(3).fill('-'));
         return this.board;
     }
 
     public move(row: number, col: number){
         if(!this.isOver()){
-            if(PlayerClass.getOpponent() === 'X'){
-                PlayerClass.setOppnent('O');
-            }else{
-                PlayerClass.setOppnent('X');
-            }
+            this.switchPlayer();
             this.board[row][col] = PlayerClass.getOpponent();
             this.isOver();
         }
     }
     
     public isOver(): boolean{
-        if(this.board[0][0] !== '-' && this.board[0][0] === this.board[1][1] && this.board[2][2] === this.board[0][0]){
-            PlayerClass.setWinner(this.board[0][0]);
+        if (this.checkRowWin() ||
+        this.checkColumnWin() ||
+        this.checkDiagonalWin() ||
+        this.checkDraw()) {
             return true;
         }
         return false;
     }
+
+    private switchPlayer(): void{
+        PlayerClass.setOpponent(PlayerClass.getOpponent() === 'X' ? 'O' : 'X');
+    }
+
+    private setWinner(op: string){
+        this.winner = op;
+    }
+
+    public getWinner(): string{
+        return this.winner !== '' ? this.winner : 'none';
+    }
+
+    public reset(){
+        this.createBoard();
+    }
+
+    private checkDiagonalWin(): boolean {
+        const diag1 = this.board[0][0] !== '-' && this.board[0][0] === this.board[1][1] && this.board[2][2] === this.board[0][0];
+        const diag2 = this.board[0][2] !== '-' && this.board[0][2] === this.board[1][1] && this.board[2][0] === this.board[0][2];
+        if (diag1 || diag2) {
+          this.setWinner(this.board[1][1]);
+          return true;
+        }
+        return false;
+    }
+
+    private checkRowWin(): boolean {
+        for (let row = 0; row < 3; row++) {
+          if (
+            this.board[row][0] !== '-' &&
+            this.board[row][0] === this.board[row][1] &&
+            this.board[row][1] === this.board[row][2]
+          ) {
+            this.setWinner(this.board[row][0]);
+            return true;
+          }
+        }
+        return false;
+      }
+    
+      private checkColumnWin(): boolean {
+        for (let col = 0; col < 3; col++) {
+          if (
+            this.board[0][col] !== '-' &&
+            this.board[0][col] === this.board[1][col] &&
+            this.board[1][col] === this.board[2][col]
+          ) {
+            this.setWinner(this.board[0][col]);
+            return true;
+          }
+        }
+        return false;
+      }
+    
+      private checkDraw(): boolean {
+        return this.board.every(row => row.every(cell => cell !== '-'));
+      }
 }
 const obj = BoardService.getInstance();
 export default obj;
